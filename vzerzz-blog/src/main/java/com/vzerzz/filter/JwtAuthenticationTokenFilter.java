@@ -17,9 +17,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalTime;
+import java.util.Enumeration;
 import java.util.Objects;
 
 
@@ -36,6 +39,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
         //获取请求头中的token值
         String token = request.getHeader("token");
+        // System.out.println("请求头中的token值为: " + token);
+
         //判断上面那行有没有拿到token值
         if(!StringUtils.hasText(token)){
             //说明该接口不需要登录，直接放行，不拦截
@@ -57,13 +62,15 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         String userid = claims.getSubject();
 
         //在redis中，通过key来获取value，注意key我们是加过前缀的，取的时候也要加上前缀
-        LoginUser loginUser = redisCache.getCacheObject("bloglogin:" + userid);
+        LoginUser loginUser = redisCache.getCacheObject("login:" + userid);
         //如果在redis获取不到值，说明登录是过期了，需要重新登录
         if(Objects.isNull(loginUser)){
             ResponseResult result = ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
             WebUtils.renderString(response, JSON.toJSONString(result));
             return;
         }
+
+
 
         //把从redis获取到的value，存入到SecurityContextHolder(Security官方提供的类)
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser,null,null);

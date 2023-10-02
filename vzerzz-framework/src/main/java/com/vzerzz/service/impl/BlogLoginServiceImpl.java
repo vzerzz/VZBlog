@@ -48,7 +48,7 @@ public class BlogLoginServiceImpl implements BlogLoginService {
 
         //下面那行的第一个参数: 把上面那行的jwt，也就是token值保存到Redis。存到时候是键值对的形式，值就是jwt，key要加上 "bloglogin:" 前缀
         //下面那行的第二个参数: 要把哪个对象存入Redis。我们写的是loginUser，里面有权限信息，后面会用到
-        redisCache.setCacheObject("bloglogin:"+userId,loginUser);
+        redisCache.setCacheObject("login:"+userId,loginUser);
 
 
         //把User转化为UserInfoVo，再放入vo对象的第二个参数
@@ -72,7 +72,7 @@ public class BlogLoginServiceImpl implements BlogLoginService {
         Long userid = loginUser.getUser().getId();
 
         //在redis根据key来删除用户的value值，注意之前我们在存key的时候，key是加了'bloglogin:'前缀
-        redisCache.deleteObject("bloglogin:"+userid);
+        redisCache.deleteObject("login:"+userid);
         //封装响应返回
         return ResponseResult.okResult();
     }
